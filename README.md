@@ -44,3 +44,31 @@ This project is written using:
 
 21-02-2021 4:59pm - Application now has a fully-functional express server, with a GET route for the location resource.
 21-02-2021 4:59pm - Application now has a fully-functional express server, with a GET route for the weather resource.
+
+[Heroku Link](https://city-explorer-oht.herokuapp.com/)
+
+> ```https://city-explorer-oht.herokuapp.com/```
+
+
+## Features
+
+Number and name of feature: Location route
+
+Estimate of time needed to complete: 2 hour
+
+Start time: 1:30
+
+Finish time: 3:30
+
+Actual time needed to complete: 2 hours
+
+
+Number and name of feature: weather route
+
+Estimate of time needed to complete: 2 hours
+
+Start time: 4:00
+
+Finish time: 4:40
+
+Actual time needed to complete: 40 min
