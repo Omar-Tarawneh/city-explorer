@@ -15,8 +15,10 @@ require('dotenv').config();
 const PORT = process.env.PORT;
 
 
-
+//===============
 // handler functions
+//==============
+
 
 // handle the location
 const handleLocation = (req, res) => {
@@ -24,6 +26,7 @@ const handleLocation = (req, res) => {
     let locationObject = getLocaitonData(searchQuery);
     res.status(200).send(locationObject);
 }
+
 // handle the weather
 const handleWeather = (req, res) => {
 
@@ -40,7 +43,7 @@ const getWeatherData = () => {
     });
     return weatherArray;
 }
-
+// format the date to day name/ month name/ day number/ year number
 const formatDate = (date) => {
     let str = new Date(date).toString()
     let strArr = str.split(' ');
@@ -66,8 +69,9 @@ function getLocaitonData(searchQuery) {
 
     return responseObject;
 }
-
+//=============
 // constructors
+//=============
 
 // constructro for location
 function CityLocation(searchQuery, displayName, lat, lon) {
