@@ -1,7 +1,7 @@
 # City-Explorer
 
 **Author**: Omar Tarawneh
-**Version**: 1.0.1(increment the patch/fix version number if you make more commits past your first submission)
+**Version**: 1.0.2(increment the patch/fix version number if you make more commits past your first submission)
 
 ## Overview
 <!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
@@ -33,6 +33,8 @@ This project is written using:
 
 - express: 4.17.1
 
+- superagent: 6.1.0
+
 ## Change Log
 
 <!-- Use this area to document the iterative changes made to your application as each feature is successfully implemented. Use time stamps. Here's an examples:
@@ -44,6 +46,7 @@ This project is written using:
 
 21-02-2021 4:59pm - Application now has a fully-functional express server, with a GET route for the location resource.
 21-02-2021 4:59pm - Application now has a fully-functional express server, with a GET route for the weather resource.
+22-02-2021 5:00pm - Application now has a fully-functional express server, with a GET route for the Park resource.
 
 [Heroku Link](https://city-explorer-oht.herokuapp.com/)
 
@@ -72,3 +75,37 @@ Start time: 4:00
 Finish time: 4:40
 
 Actual time needed to complete: 40 min
+
+
+Number and name of feature: locationIQ API
+
+Estimate of time needed to complete: 2 hours
+
+Start time: 1:35
+
+Finish time: 2:00
+
+Actual time needed to complete: 25 min
+
+
+
+Number and name of feature: Weather API
+
+Estimate of time needed to complete: 2 hours
+
+Start time: 2:00
+
+Finish time: 3:00
+
+Actual time needed to complete: 60 min
+
+
+Number and name of feature: Parks API
+
+Estimate of time needed to complete: 2 hours
+
+Start time: 3:00
+
+Finish time: 5:00
+
+Actual time needed to complete: 120 min

@@ -1,47 +1,120 @@
 'use strict';
 
-
-
 // require statements (importing packages)
 let express = require('express');
 const cors = require('cors');
+const superagent = require('superagent');
 
-// initializations and conficguration
+// initializations and confieguration
 let app = express();
 app.use(cors());
 require('dotenv').config();
 
-
+// PORT
 const PORT = process.env.PORT;
+
+
 
 
 //===============
 // handler functions
 //==============
 
+// handle the error page not found
+const pageNotFound = (req, res) => {
+    res.status(404).send('Sorry, the page does not exist Try again :)');
+}
+
 
 // handle the location
 const handleLocation = (req, res) => {
-    let searchQuery = req.query.city;
-    let locationObject = getLocaitonData(searchQuery);
-    res.status(200).send(locationObject);
+    try {
+        let searchQuery = req.query.city;
+        getLocaitonData(searchQuery).then(locationObject => {
+            res.status(200).send(locationObject);
+        });
+    } catch (error) {
+        let errorObject = { status: 500, responseText: `Sorry, something went wrong ${error}` };
+        res.status(500).send(errorObject);
+    }
 }
 
 // handle the weather
 const handleWeather = (req, res) => {
+    try {
+        getWeatherData(req.query.latitude, req.query.longitude).then(weatherObjects => {
+            res.status(200).send(weatherObjects);
+        })
+    } catch (error) {
+        let errorObject = { status: 500, responseText: `Sorry, something went wrong ${error}` };
+        res.status(500).send(errorObject);
+    }
 
-    let weatherObjects = getWeatherData();
-    res.status(200).send(weatherObjects);
 }
 
+// handle the parks 
+const handlePark = (req, res) => {
+    try {
+        getParksData(req.query.search_query).then(parkObjects => {
+            res.status(200).send(parkObjects);
+        })
+    } catch (error) {
+        let errorObject = { status: 500, responseText: `Sorry, something went wrong ${error}` };
+        res.status(500).send(errorObject);
+    }
+
+}
+
+//===============
+// functions
+//===============
+
+// return an string of the address from the addresses objects
+const getAddress = (addresse) => {
+    let addressString = Object.values(addresse).join(' ');
+    return addressString;
+}
+
+
+
+
+// return an array of objects of parks
+const getParksData = (search_query) => {
+    const url = 'https://developer.nps.gov/api/v1/parks';
+    const query = {
+        api_key: process.env.PARKS_API_KEY,
+        q: search_query,
+        limit: 2
+    }
+    return superagent.get(url).query(query)
+        .then(parksData => {
+            let parksArray = parksData.body.data.map(value => {
+                return new Park(value.fullName, getAddress(value.addresses[0]), value.fees.length, value.description, value.url);
+            });
+            return parksArray;
+        }).catch(error => {
+            console.log(error);
+        })
+}
+
+
 // return an array of the data of the weather
-const getWeatherData = () => {
-    let weatherArray = [];
-    let weatherData = require('./data/weather.json');
-    weatherData.data.forEach(element => {
-        weatherArray.push(new weather(element.weather.description, formatDate(element.valid_date)));
-    });
-    return weatherArray;
+const getWeatherData = (latitude, longitude) => {
+    const url = 'https://api.weatherbit.io/v2.0/forecast/daily';
+    const query = {
+        key: process.env.WEATHER_API_KEY,
+        lat: latitude,
+        lon: longitude,
+    }
+    return superagent.get(url).query(query)
+        .then(weatherData => {
+            let weatherArray = weatherData.body.data.map(value => {
+                return new Weather(value.weather.description, formatDate(value.valid_date), value.description, value.url);
+            })
+            return weatherArray;
+        }).catch(error => {
+            return error;
+        });
 }
 // format the date to day name/ month name/ day number/ year number
 const formatDate = (date) => {
@@ -50,25 +123,32 @@ const formatDate = (date) => {
     return strArr.slice(0, 4).join(' ');
 }
 
+// return an array of location data (longitude, latitude, name)
+function getLocaitonData(searchQuery) {
+    let url = 'https://us1.locationiq.com/v1/search.php';
+    const query = {
+        key: process.env.GEOCODE_API_KEY,
+        q: searchQuery,
+        limit: 1,
+        format: 'json'
+    }
+    return superagent.get(url).query(query)
+        .then(data => {
+            let cityObject = data.body[0];
+            let responseObject = new CityLocation(searchQuery, cityObject.display_name, cityObject.lat, cityObject.lon);
+            return responseObject
+        }).catch(error => {
+            console.log(error);
+        });
+}
 
-
+// ============
 // routes - endpoinst
+//=============
 app.get('/location', handleLocation);
 app.get('/weather', handleWeather);
-
-// handle data for functions
-function getLocaitonData(searchQuery) {
-    // get the data array from the json
-    let locaitonData = require('./data/location.json');
-    // get the lon and lat
-    let longitude = locaitonData[0].lon;
-    let latitude = locaitonData[0].lat;
-    let displayName = locaitonData[0].display_name;
-
-    let responseObject = new CityLocation(searchQuery, displayName, latitude, longitude);
-
-    return responseObject;
-}
+app.get('/parks', handlePark)
+app.get('*', pageNotFound);
 //=============
 // constructors
 //=============
@@ -81,11 +161,18 @@ function CityLocation(searchQuery, displayName, lat, lon) {
     this.longitude = lon;
 }
 // constructor for weather
-function weather(description, date) {
+function Weather(description, date) {
     this.forecast = description;
     this.time = date;
 }
-
+// constructor for parks
+function Park(name, address, fee, description, url) {
+    this.name = name;
+    this.address = address;
+    this.fee = fee;
+    this.description = description;
+    this.url = url
+}
 
 // listining ports
 app.listen(PORT, () => {
