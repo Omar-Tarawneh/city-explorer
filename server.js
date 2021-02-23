@@ -4,12 +4,15 @@
 let express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
+const pg = require('pg');
+
 
 // initializations and confieguration
 let app = express();
 app.use(cors());
 require('dotenv').config();
-
+// const client = new pg.Client(process.env.DATABASE_URL);
+const client = new pg.Client({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 // PORT
 const PORT = process.env.PORT;
 
@@ -30,9 +33,19 @@ const pageNotFound = (req, res) => {
 const handleLocation = (req, res) => {
     try {
         let searchQuery = req.query.city;
-        getLocaitonData(searchQuery).then(locationObject => {
-            res.status(200).send(locationObject);
+        checkDB(searchQuery).then(locationObject => {
+            if (locationObject) {
+                console.log('From the Data Base', locationObject);
+                res.status(200).send(locationObject);
+            } else {
+                getLocaitonData(searchQuery).then(locationObject => {
+                    insertLocationData(locationObject);
+                    console.log('From the API..')
+                    res.status(200).send(locationObject);
+                });
+            }
         });
+
     } catch (error) {
         let errorObject = { status: 500, responseText: `Sorry, something went wrong ${error}` };
         res.status(500).send(errorObject);
@@ -69,9 +82,36 @@ const handlePark = (req, res) => {
 // functions
 //===============
 
+// check if the location is in the data base if it does send the response if not request from the API
+const checkDB = (city_name) => {
+
+    let dbQuery = `SELECT * FROM locations WHERE city_name='${city_name}'`;
+    return client.query(dbQuery).then(data => {
+        console.log(data);
+        if (data.rows.length !== 0) {
+            let responseObject = new CityLocation(data.rows[0].city_name, data.rows[0].formatted_query, data.rows[0].latitude, data.rows[0].longitude);
+            return responseObject;
+        } else {
+            return false;
+        }
+    }).catch(error => {
+        console.log(error);
+    })
+}
+// Inserte the new location data into the Data Base
+const insertLocationData = (city) => {
+    let dbQuery = `INSERT INTO locations(city_name, formatted_query, latitude, longitude) VALUES($1,$2,$3,$4)`;
+    let secureValues = [city.search_query, city.formatted_query, city.latitude, city.longitude];
+    client.query(dbQuery, secureValues).then(data => {
+        console.log('Data for the location INSERTED :)');
+    })
+}
+
+
+
 // return an string of the address from the addresses objects
-const getAddress = (addresse) => {
-    let addressString = Object.values(addresse).join(' ');
+const getAddress = (address) => {
+    let addressString = Object.values(address).join(' ');
     return addressString;
 }
 
@@ -175,8 +215,12 @@ function Park(name, address, fee, description, url) {
 }
 
 // listining ports
-app.listen(PORT, () => {
-    console.log('the app is listening on port: ' + PORT)
+client.connect().then(() => {
+    app.listen(PORT, () => {
+        console.log('the app is listening on port: ' + PORT)
+    });
+}).catch(error => {
+    console.log('There is an Error ' + error);
 });
 
 
