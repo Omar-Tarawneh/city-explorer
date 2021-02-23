@@ -1,7 +1,7 @@
 # City-Explorer
 
 **Author**: Omar Tarawneh
-**Version**: 1.0.2(increment the patch/fix version number if you make more commits past your first submission)
+**Version**: 1.0.3(increment the patch/fix version number if you make more commits past your first submission)
 
 ## Overview
 <!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
@@ -34,6 +34,8 @@ This project is written using:
 - express: 4.17.1
 
 - superagent: 6.1.0
+
+- pg: 
 
 ## Change Log
 
@@ -101,6 +103,16 @@ Actual time needed to complete: 60 min
 
 
 Number and name of feature: Parks API
+
+Estimate of time needed to complete: 2 hours
+
+Start time: 3:00
+
+Finish time: 5:00
+
+Actual time needed to complete: 120 min
+
+Number and name of feature: Data Base
 
 Estimate of time needed to complete: 2 hours
 
